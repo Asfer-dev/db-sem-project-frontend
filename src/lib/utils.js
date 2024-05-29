@@ -7,13 +7,20 @@ export function cn(...inputs) {
 
 export function getTimeFromDateString(dateString) {
   const date = new Date(dateString);
-  // Extract time components
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const seconds = String(date.getSeconds()).padStart(2, "0");
 
-  // Format time as HH:mm:ss
-  return `${hours}:${minutes}:${seconds}`;
+  // Extract time components
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  // Determine AM/PM
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  // Convert to 12-hour format
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+
+  // Format time as H:mm AM/PM
+  return `${hours}:${minutes} ${ampm}`;
 }
 
 export function combineDateAndTime(date, time) {

@@ -24,7 +24,6 @@ const loginSchema = z.object({
 });
 
 const LoginPage = () => {
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   // 1. Define your form.
@@ -69,7 +68,7 @@ const LoginPage = () => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 max-w-[500px] mx-auto"
+          className="space-y-8 max-w-[450px] mx-auto p-8 rounded-lg border"
         >
           <PageHeading text={"User Login"} />
           <FormField
@@ -106,7 +105,6 @@ const LoginPage = () => {
           >
             {loading ? "Logging in..." : "Log in"}
           </Button>
-          {error && <p className="text-red-500">{error}</p>}
           <p>
             {/* eslint-disable-next-line react/no-unescaped-entities */}
             Don't have an account? Sign up{" "}

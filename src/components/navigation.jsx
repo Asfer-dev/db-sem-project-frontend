@@ -10,11 +10,11 @@ const Navigation = () => {
   };
 
   return (
-    <header className="flex flex-col sm:flex-row justify-between w-full px-8 py-6 gap-4 border-b border-2 bg-orange-100">
+    <header className="flex flex-col sm:flex-row justify-between w-full px-8 py-6 gap-4 shadow bg-orange-100">
       <nav>
         <ul className="flex items-center">
           <li className="mr-4">
-            <a className="font-medium text-xl text-amber-800" href="/">
+            <a className="font-medium text-xl text-orange-700" href="/">
               A&A Movers
             </a>
           </li>

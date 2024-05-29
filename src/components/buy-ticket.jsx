@@ -38,6 +38,10 @@ const passengerInfoSchema = z.object({
 });
 
 const BuyTicket = () => {
+  const isAuthenticated = !!sessionStorage.getItem("email");
+  if (!isAuthenticated) {
+    window.location.href = "/login";
+  }
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const busId = queryParams.get("bus_id");
@@ -45,6 +49,7 @@ const BuyTicket = () => {
     window.location.href = "/";
   }
 
+  // eslint-disable-next-line no-unused-vars
   const [bus, setBus] = useState(null);
   const [seats, setSeats] = useState(
     Array.from({ length: 40 }, (_, index) => ({
@@ -103,7 +108,6 @@ const BuyTicket = () => {
     seats.map;
   }, []);
 
-  const [error, setError] = useState("");
   // 1. Define your form.
   const form = useForm({
     resolver: zodResolver(passengerInfoSchema),
@@ -177,151 +181,168 @@ const BuyTicket = () => {
 
   return (
     <>
-      <PageHeading text={"Buy Ticket"} />
-      <SectionHeading text={"Choose your seat"} />
-      <div className="grid grid-cols-4 gap-4 w-[500px]">
-        {seats.map((seat) => (
-          <button
-            onClick={(e) => handleSeatSelect(e, seat)}
-            disabled={seat.passenger}
-            className={`w-8 h-8 rounded-md ${
-              seat.passenger?.gender === "M"
-                ? "bg-blue-300"
-                : seat.passenger?.gender === "F"
-                ? "bg-red-300"
-                : selectedSeat?.seat_no === seat.seat_no
-                ? "bg-gray-400"
-                : "bg-gray-200"
-            }`}
-            key={seat.seat_no}
-          >
-            {seat.passenger?.gender}
-          </button>
-        ))}
-      </div>
-      <div>
-        Chosen seat: {selectedSeat ? selectedSeat.seat_no : "No seat chosen"}
-      </div>
-      <SectionHeading text={"Provide Passenger Info"} />
-      <div>
-        <Select
-          value={passengerInfoMode}
-          defaultValue="default"
-          onValueChange={(value) => setPassengerInfoMode(value)}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="default">For yourself</SelectItem>
-            <SelectItem value="custom">For someone else</SelectItem>
-          </SelectContent>
-        </Select>
+      <PageHeading
+        text={"Buy Ticket"}
+        subtext="Choose from the available seats and provide necessary information"
+      />
+      <div className="flex gap-4">
+        <div>
+          <div className="mr-24">
+            <SectionHeading text={"Choose your Seat"} />
+          </div>
+          <div className="grid grid-cols-4 gap-4 w-[500px] mx-auto items-center justify-center">
+            {seats.map((seat) => (
+              <button
+                onClick={(e) => handleSeatSelect(e, seat)}
+                disabled={seat.passenger}
+                className={`w-8 h-8 rounded-md text-sm font-medium ${
+                  seat.passenger?.gender === "M"
+                    ? "bg-blue-300 text-blue-500"
+                    : seat.passenger?.gender === "F"
+                    ? "bg-red-300 text-red-400"
+                    : selectedSeat?.seat_no === seat.seat_no
+                    ? "bg-slate-400 text-white"
+                    : "bg-slate-200 text-slate-600"
+                }`}
+                key={seat.seat_no}
+              >
+                {seat.passenger ? seat.passenger?.gender : seat.seat_no}
+              </button>
+            ))}
+          </div>
+          <div className="my-8 text-center mb-8 text-lg mr-24">
+            <span className="text-orange-600">Chosen seat:</span>{" "}
+            <span className="font-medium">
+              {selectedSeat ? selectedSeat.seat_no : "No seat chosen"}
+            </span>
+          </div>
+        </div>
+        <div className="w-full">
+          <SectionHeading text={"Provide Passenger Info"} />
+          <div>
+            <div className="flex justify-center"></div>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8 max-w-[500px] mx-auto"
-          >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      disabled={passengerInfoMode === "default"}
-                      placeholder="name"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    This will be your Display Name
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="gender"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Gender</FormLabel>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-8 max-w-[500px] mx-auto"
+              >
+                <div className="flex gap-4 items-center">
+                  <p className="text-sm">Buying Ticket for: </p>
                   <Select
-                    disabled={passengerInfoMode === "default"}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
+                    value={passengerInfoMode}
+                    defaultValue="default"
+                    onValueChange={(value) => setPassengerInfoMode(value)}
                   >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select gender" />
-                      </SelectTrigger>
-                    </FormControl>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="M">Male</SelectItem>
-                      <SelectItem value="F">Female</SelectItem>
+                      <SelectItem value="default">For yourself</SelectItem>
+                      <SelectItem value="custom">For someone else</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormDescription>Choose your gender.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="cnic"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CNIC</FormLabel>
-                  <FormControl>
-                    <Input
-                      disabled={passengerInfoMode === "default"}
-                      placeholder="CNIC"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Your CNIC is required for buying tickets.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="contact_no"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contact No.</FormLabel>
-                  <FormControl>
-                    <Input
-                      disabled={passengerInfoMode === "default"}
-                      placeholder="Your phone number"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Enter your Contact Number here.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={passengerInfoMode === "default"}
+                          placeholder="name"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        This will be your Display Name
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="gender"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gender</FormLabel>
+                      <Select
+                        disabled={passengerInfoMode === "default"}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="M">Male</SelectItem>
+                          <SelectItem value="F">Female</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>Choose your gender.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="cnic"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CNIC</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={passengerInfoMode === "default"}
+                          placeholder="CNIC"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Your CNIC is required for buying tickets.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="contact_no"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contact No.</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={passengerInfoMode === "default"}
+                          placeholder="Your phone number"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter your Contact Number here.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <Button
-              disabled={loading}
-              variant="primary"
-              type="submit"
-              className="w-full"
-            >
-              {loading ? "Booking your Ticket..." : "Book Ticket"}
-            </Button>
-            {error && <p className="text-red-500">{error}</p>}
-          </form>
-        </Form>
+                <Button
+                  disabled={loading}
+                  variant="primary"
+                  type="submit"
+                  className="w-full"
+                >
+                  {loading ? "Booking your Ticket..." : "Book Ticket"}
+                </Button>
+              </form>
+            </Form>
+          </div>
+        </div>
       </div>
     </>
   );

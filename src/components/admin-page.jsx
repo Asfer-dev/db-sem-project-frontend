@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect } from "react";
 import { useState } from "react";
 import axios from "axios";
@@ -9,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { date, z } from "zod";
+import { z } from "zod";
 
 import { Button } from "./ui/button";
 import {
@@ -29,8 +30,8 @@ import SectionHeading from "./section-heading";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Calendar } from "./ui/calendar";
-import { addDays, format } from "date-fns";
-import { cn, combineDateAndTime, getTimeFromDateString } from "../lib/utils";
+import { format } from "date-fns";
+import { cn, combineDateAndTime } from "../lib/utils";
 
 const busSchema = z.object({
   route_id: z.string(),
@@ -125,13 +126,16 @@ const AdminPage = () => {
 
   return (
     <>
-      <PageHeading text={"Admin"} />
-      <SectionHeading text={"Add Bus"} />
+      <PageHeading text={"Admin"} subtext="This is the Admin Portal" />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 max-w-[550px] mx-auto"
+          className="space-y-8 max-w-[550px] mx-auto p-8 rounded-lg border"
         >
+          <SectionHeading
+            text={"Add Bus"}
+            className="text-orange-600 text-left"
+          />
           <FormField
             control={form.control}
             name="route_id"
@@ -150,9 +154,24 @@ const AdminPage = () => {
                   <SelectContent>
                     {routes?.map((route) => (
                       <SelectItem key={route._id} value={route._id}>
-                        {getTerminalCity(route.departure_terminal) +
-                          " -> " +
-                          getTerminalCity(route.destination_terminal)}
+                        <div className="flex gap-2 items-center">
+                          {getTerminalCity(route.departure_terminal)}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="size-5"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
+                            />
+                          </svg>
+                          {getTerminalCity(route.destination_terminal)}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>

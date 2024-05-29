@@ -36,7 +36,6 @@ const signupSchema = z.object({
 });
 
 const SignupPage = () => {
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   // 1. Define your form.
   const form = useForm({
@@ -79,7 +78,7 @@ const SignupPage = () => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 max-w-[500px] mx-auto"
+          className="space-y-8 max-w-[500px] mx-auto p-8 rounded-lg border"
         >
           <PageHeading text={"User Sign up"} />
           <FormField
@@ -213,7 +212,6 @@ const SignupPage = () => {
           >
             {loading ? "Signing up..." : "Sign up"}
           </Button>
-          {error && <p className="text-red-500">{error}</p>}
           <p>
             Already have an account? Log in{" "}
             <a
