@@ -1,35 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./App.css";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import TicketsPage from "./components/tickets-page";
+import BuyTicket from "./components/buy-ticket";
+import LoginPage from "./components/login-page";
+import Profile from "./components/profile";
+import SignupPage from "./components/signup-page";
+import Navigation from "./components/navigation";
+import { Toaster } from "./components/ui/toaster";
+import AdminPage from "./components/admin-page";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <BrowserRouter>
+      <Navigation />
+
+      <main className="py-8 px-4 max-w-[1150px] mx-auto">
+        <Routes>
+          <Route path="/" element={<TicketsPage />} />
+          <Route path="/buy-ticket" element={<BuyTicket />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/admin" element={<AdminPage />} />
+        </Routes>
+      </main>
+
+      <Toaster />
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
