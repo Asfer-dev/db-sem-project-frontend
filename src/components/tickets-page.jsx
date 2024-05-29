@@ -14,7 +14,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "./ui/calendar";
 import { addDays, format } from "date-fns";
-import { cn, getTimeFromDateString } from "../lib/utils";
+import {
+  cn,
+  getFormattedDate,
+  getTimeFromDateString,
+  isTodayOrFuture,
+} from "../lib/utils";
 // import { IconArrowRight } from "../lib/icons";
 
 const TicketsPage = () => {
@@ -30,8 +35,9 @@ const TicketsPage = () => {
     try {
       const response = await axios.get(`http://localhost:5000/buses`);
       console.log(response.data);
-      setBuses(response.data);
-      console.log(response.data);
+      setBuses(
+        response.data.filter((bus) => isTodayOrFuture(bus.departure_time))
+      );
     } catch (err) {
       console.log(err);
     }
@@ -58,21 +64,25 @@ const TicketsPage = () => {
   useEffect(() => {
     axios.get(`http://localhost:5000/buses`).then((response) => {
       setBuses(
-        response.data.filter((bus) => {
-          let sameDate = true;
-          let sameDepart = true;
-          let sameDest = true;
-          if (filters.departTerminal !== "")
-            sameDepart =
-              bus.route.departure_terminal === filters.departTerminal;
-          if (filters.destTerminal !== "")
-            sameDest = bus.route.destination_terminal === filters.destTerminal;
-          if (filters.date) {
-            sameDate =
-              new Date(bus.departure_time).getDate() === filters.date.getDate();
-          }
-          return sameDate && sameDepart && sameDest;
-        })
+        response.data
+          .filter((bus) => isTodayOrFuture(bus.departure_time))
+          .filter((bus) => {
+            let sameDate = true;
+            let sameDepart = true;
+            let sameDest = true;
+            if (filters.departTerminal !== "")
+              sameDepart =
+                bus.route.departure_terminal === filters.departTerminal;
+            if (filters.destTerminal !== "")
+              sameDest =
+                bus.route.destination_terminal === filters.destTerminal;
+            if (filters.date) {
+              sameDate =
+                new Date(bus.departure_time).getDate() ===
+                filters.date.getDate();
+            }
+            return sameDate && sameDepart && sameDest;
+          })
       );
     });
   }, [filters]);
@@ -218,9 +228,15 @@ const TicketsPage = () => {
                     </svg>
                     {getTerminalCity(bus.route.destination_terminal)}
                   </div>
-                  <div>
-                    <span className={infoTextStyles}>Departure Time:</span>{" "}
-                    {getTimeFromDateString(bus.departure_time)}
+                  <div className="flex gap-8">
+                    <div>
+                      <span className={infoTextStyles}>Departure Time:</span>{" "}
+                      {getTimeFromDateString(bus.departure_time)}
+                    </div>
+                    <div>
+                      <span className={infoTextStyles}>Date:</span>{" "}
+                      {getFormattedDate(bus.departure_time)}
+                    </div>
                   </div>
                   <div>
                     <span className={infoTextStyles}>Type:</span> {bus.type}

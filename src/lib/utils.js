@@ -44,3 +44,25 @@ export function combineDateAndTime(date, time) {
 
   return datetimeString;
 }
+
+export function getFormattedDate(dateString) {
+  const date = new Date(dateString);
+
+  // Options for toLocaleDateString to get the "Day Month" format
+  const options = { day: "numeric", month: "long" };
+
+  // Format the date string
+  return date.toLocaleDateString("en-US", options);
+}
+
+export function isTodayOrFuture(dateString) {
+  const inputDate = new Date(dateString);
+  const today = new Date();
+
+  // Normalize the dates to remove the time part
+  inputDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+
+  // Compare the dates
+  return inputDate >= today;
+}
