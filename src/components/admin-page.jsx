@@ -38,6 +38,11 @@ const busSchema = z.object({
   time: z.string(),
   type: z.string(),
 });
+const routeSchema = z.object({
+  departure_terminal_id: z.string(),
+  destination_terminal_id: z.string(),
+  fare: z.string(),
+});
 
 const AdminPage = () => {
   const [buses, setBuses] = useState([]);
@@ -97,6 +102,15 @@ const AdminPage = () => {
     },
   });
 
+  const routeForm = useForm({
+    resolver: zodResolver(routeSchema),
+    defaultValues: {
+      departure_terminal_id: "",
+      destination_terminal_id: "",
+      fare: "",
+    },
+  });
+
   const { toast } = useToast();
 
   // 2. Define a submit handler.
@@ -123,153 +137,265 @@ const AdminPage = () => {
       });
     }
   }
+  async function onSubmitRoute(values) {
+    try {
+      const response = await axios.post("http://localhost:5000/routes", values);
+      console.log(response.data);
+      toast({
+        variant: "success",
+        title: "Route Added!",
+        description: "Successfully added a Route.",
+      });
+    } catch (err) {
+      console.log(err.response?.data.message);
+      toast({
+        variant: "destructive",
+        title: "Oops!",
+        description: "Something went wrong. " + err.response?.data?.message,
+      });
+    }
+  }
 
   return (
     <>
       <PageHeading text={"Admin"} subtext="This is the Admin Portal" />
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 max-w-[550px] mx-auto p-8 rounded-lg border"
-        >
-          <SectionHeading
-            text={"Add Bus"}
-            className="text-orange-600 text-left"
-          />
-          <FormField
-            control={form.control}
-            name="route_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Travel Route</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Route" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {routes?.map((route) => (
-                      <SelectItem key={route._id} value={route._id}>
-                        <div className="flex gap-2 items-center">
-                          {getTerminalCity(route.departure_terminal)}
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="size-5"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
-                            />
-                          </svg>
-                          {getTerminalCity(route.destination_terminal)}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormDescription>Choose the bus route.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex gap-4">
-            <FormItem className="flex flex-col">
-              <FormLabel className="mb-[10px]">Pick a Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !date && "text-muted-foreground"
-                      )}
-                    >
-                      {date ? format(date, "PPP") : <span>Pick a date</span>}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    className={""}
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
+      <div className="space-y-8">
+        {/* ADD BUS FORM */}
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-8 max-w-[550px] mx-auto p-8 rounded-lg border"
+          >
+            <SectionHeading
+              text={"Add Bus"}
+              className="text-orange-600 text-left"
+            />
             <FormField
               control={form.control}
-              name="time"
+              name="route_id"
               render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>Pick a Time</FormLabel>
-                  <FormControl>
-                    <div>
-                      <input
-                        className="border px-2 py-1 rounded-md w-full shadow-sm"
-                        type="time"
-                        onChange={field.onChange}
-                        value={field.value}
-                      />
-                    </div>
-                  </FormControl>
+                <FormItem>
+                  <FormLabel>Travel Route</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Route" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {routes?.map((route) => (
+                        <SelectItem key={route._id} value={route._id}>
+                          <div className="flex gap-2 items-center">
+                            {getTerminalCity(route.departure_terminal)}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={1.5}
+                              stroke="currentColor"
+                              className="size-5"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
+                              />
+                            </svg>
+                            {getTerminalCity(route.destination_terminal)}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>Choose the bus route.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Bus Type</FormLabel>
-                <Select
-                  className="w-full"
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Bus Type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {busTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormDescription>Choose a Bus Type.</FormDescription>
+            <div className="flex gap-4">
+              <FormItem className="flex flex-col">
+                <FormLabel className="mb-[10px]">Pick a Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] pl-3 text-left font-normal",
+                          !date && "text-muted-foreground"
+                        )}
+                      >
+                        {date ? format(date, "PPP") : <span>Pick a date</span>}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      className={""}
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
-            )}
-          />
+              <FormField
+                control={form.control}
+                name="time"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>Pick a Time</FormLabel>
+                    <FormControl>
+                      <div>
+                        <input
+                          className="border px-2 py-1 rounded-md w-full shadow-sm"
+                          type="time"
+                          onChange={field.onChange}
+                          value={field.value}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Bus Type</FormLabel>
+                  <Select
+                    className="w-full"
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Bus Type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {busTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>Choose a Bus Type.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <Button variant="primary" type="submit" className="w-full">
-            Add Bus
-          </Button>
-        </form>
-      </Form>
+            <Button variant="primary" type="submit" className="w-full">
+              Add Bus
+            </Button>
+          </form>
+
+          {/* ADD ROUTE FORM */}
+        </Form>
+        <Form {...routeForm}>
+          <form
+            onSubmit={routeForm.handleSubmit(onSubmitRoute)}
+            className="space-y-8 max-w-[550px] mx-auto p-8 rounded-lg border"
+          >
+            <SectionHeading
+              text={"Add Route"}
+              className="text-orange-600 text-left"
+            />
+            <FormField
+              control={routeForm.control}
+              name="departure_terminal_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Departure Terminal</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Departure Terminal" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {terminals?.map((terminal) => (
+                        <SelectItem key={terminal._id} value={terminal._id}>
+                          {terminal.terminal_city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Choose the Departure Terminal.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={routeForm.control}
+              name="destination_terminal_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Destination Terminal</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Departure Terminal" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {terminals?.map((terminal) => (
+                        <SelectItem key={terminal._id} value={terminal._id}>
+                          {terminal.terminal_city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Choose the Destination Terminal.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={routeForm.control}
+              name="fare"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fare</FormLabel>
+                  <Input type="number" placeholder="Fare" {...field} />
+                  <FormDescription>
+                    Decide the Fare for this Route.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button variant="primary" type="submit" className="w-full">
+              Add Route
+            </Button>
+          </form>
+        </Form>
+      </div>
     </>
   );
 };
